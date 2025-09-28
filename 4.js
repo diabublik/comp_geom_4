@@ -56,13 +56,19 @@ async function main() {
 
 function initVertexBuffers(gl) {
     const n = 3; 
+    const FSIZE = Float32Array.BYTES_PER_ELEMENT;
     
-    const verticesSizes = new Float32Array([  
-        10.0, 0.0, 0.5,   // Первая точка
-        20, -0.5, -0.5, // Вторая точка  
-        30, 0.5, -0.5   // Третья точка
+    const positions = new Float32Array([
+        0.0, 0.5,    // Первая точка: x, y
+        -0.5, -0.5,  // Вторая точка: x, y  
+        0.5, -0.5    // Третья точка: x, y
     ]);
-    const FSIZE = verticesSizes.BYTES_PER_ELEMENT;
+
+    const sizes = new Float32Array([
+        10.0,  // Первая точка: size
+        20.0,  // Вторая точка: size
+        30.0   // Третья точка: size
+    ]);
 
     // Create VAO
     squareVAO = gl.createVertexArray();
@@ -75,16 +81,24 @@ function initVertexBuffers(gl) {
         return -1;
     }
 
+    const positionsByteLength = positions.length * FSIZE
+    const sizesByteLength = sizes.length * FSIZE
+    const totalByteLength = positionsByteLength + sizesByteLength
+
     // Bind and fill buffer
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, verticesSizes, gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, totalByteLength, gl.STATIC_DRAW);
+
+    gl.bufferSubData(gl.ARRAY_BUFFER, 0, positions)
+    gl.bufferSubData(gl.ARRAY_BUFFER, positionsByteLength, sizes)
 
     // Атрибут для позиции (2 компонента: x, y)
-    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, FSIZE * 3, FSIZE * 1);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(0);
 
+
     // Атрибут для размера точки (1 компонент: size)
-    gl.vertexAttribPointer(1, 1, gl.FLOAT, false, FSIZE * 3, 0);
+    gl.vertexAttribPointer(1, 1, gl.FLOAT, false, 0, positionsByteLength);
     gl.enableVertexAttribArray(1);
 
     // Clean
